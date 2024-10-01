@@ -11,8 +11,18 @@ import java.io.IOException;
 public class HomeServlet extends HttpServlet {
     @Override
     protected void doGet( HttpServletRequest req, HttpServletResponse resp ) throws ServletException, IOException {
+        boolean isSigned = false;
+        Object signature = req.getAttribute("signature");
+        if ( signature instanceof Boolean ) {
+            isSigned = (Boolean) signature;
+        }
+        if( isSigned ) {
+            req.setAttribute("body", "home.jsp");   // ~ ViewData["body"] = "home.jsp";
+        }
+        else {
+            req.setAttribute("body", "not_found.jsp");
+        }
 
-        req.setAttribute( "body", "home.jsp" );   // ~ ViewData["body"] = "home.jsp";
         // ~ return View();
         req.getRequestDispatcher( "WEB-INF/views/_layout.jsp" ).forward(req, resp);
 
