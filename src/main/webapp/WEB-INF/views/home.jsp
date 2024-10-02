@@ -2,7 +2,7 @@
 
 <h1>Java web. JSP</h1>
 <img src="img/Java_Logo.png" alt="logo" width="100" />
-
+<i>Контроль інжекції гешу: <%= request.getAttribute("hash") %></i>
 <p>
     JSP - Java Server Pages - технологія веб-розробки з динамічним
     формуванням HTML сторінок. Аналогічно до РНР, ранніх ASP є
