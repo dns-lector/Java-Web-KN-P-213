@@ -130,9 +130,9 @@ public class AuthDao {
                 "'81661d9f-815d-11ef-bb48-fcfbf6dd7098'," +
                 "'admin', ?, ?, 1) " +
                 "ON DUPLICATE KEY UPDATE " +
-                "`user_id` = 'Administrator', " +
-                "`role_id` = 'admin@change.me', " +
-                "`login` = '1970-01-01'," +
+                "`user_id` = '7dd7d8a9-815e-11ef-bb48-fcfbf6dd7098', " +
+                "`role_id` = '81661d9f-815d-11ef-bb48-fcfbf6dd7098', " +
+                "`login` = 'admin'," +
                 "`salt` = ?," +
                 "`dk` = ?," +
                 "`is_active` = 1";
