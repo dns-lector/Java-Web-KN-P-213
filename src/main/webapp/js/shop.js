@@ -1,8 +1,5 @@
 ﻿const initialState = {
-    auth: {
-        token: null,
-        user: null
-    },
+    authUser: null,
     page: 'home',
 };
 
@@ -14,6 +11,11 @@ function reducer( state, action ) {
             window.location.hash = action.payload;
             return { ...state,
                 page: action.payload,
+            };
+        case 'authenticate' :
+            window.localStorage.setItem( "auth-user", JSON.stringify( action.payload ) );
+            return { ...state,
+                authUser: action.payload,
             };
     }
 }
@@ -82,7 +84,7 @@ function App({contextPath, homePath}) {
 }
 
 function AuthModal() {
-    const {contextPath} = React.useContext( AppContext );
+    const {contextPath, dispatch} = React.useContext( AppContext );
     const [login, setLogin] = React.useState("");
     const [password, setPassword] = React.useState("");
     const authClick = React.useCallback( () => {
@@ -92,7 +94,17 @@ function AuthModal() {
             headers: {
                 'Authorization': 'Basic ' + btoa( login + ':' + password)
             }
-        }).then(r => r.json()).then(console.log);
+        }).then(r => r.json()).then(j => {
+            if( j.status === "Ok" ) {
+                // j.data - дані про користувача, токен та права (роль)
+                // задача: зберегти ці дані і використовувати без повторної автентифікації
+                // куди можна зберігати? а) state/context б) sessionStorage в) localStorage
+               dispatch({type: 'authenticate', payload: j.data});
+            }
+            else {
+                alert( j.data );
+            }
+        });
     });
     return <div className="modal-dialog">
         <div className="modal-content">
@@ -146,3 +158,7 @@ const hp = domRoot.getAttribute("data-home-path");
 ReactDOM
     .createRoot(domRoot)
     .render(<App contextPath={cp} homePath={hp}/>);
+/*
+Д.З. Впровадити механізм автентифікації з видачею токенів у
+власний курсовий проєкт.
+ */

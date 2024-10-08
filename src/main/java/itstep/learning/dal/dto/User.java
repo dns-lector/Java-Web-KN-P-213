@@ -15,6 +15,7 @@ public class User {
     private Date   birthdate;
     private Date   deleteDt;
     private UserRole role;
+    private Token token;
 
     public User() {}
 
@@ -36,6 +37,14 @@ public class User {
         catch( Exception ignored ) {
             this.setRole( null ) ;
         }
+    }
+
+    public Token getToken() {
+        return token;
+    }
+
+    public void setToken(Token token) {
+        this.token = token;
     }
 
     public UUID getUserId() {

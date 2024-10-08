@@ -7,10 +7,9 @@ import itstep.learning.dal.dto.User;
 import itstep.learning.services.db.DbService;
 import itstep.learning.services.kdf.KdfService;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.util.Date;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 @Singleton
@@ -30,7 +29,7 @@ public class AuthDao {
         String sql = "SELECT * FROM users_access a " +
                 " JOIN users u ON a.user_id = u.user_id " +
                 " JOIN users_roles r ON a.role_id = r.role_id " +
-                " LEFT JOIN tokens t ON u.user_id = t.user_id " +
+                " LEFT JOIN tokens t ON u.user_id = t.user_id AND t.exp > CURRENT_TIMESTAMP " +
                 " WHERE a.login = ? ";
         try( PreparedStatement prep = dbService.getConnection().prepareStatement( sql ) ) {
             prep.setString( 1, login );
@@ -43,17 +42,42 @@ public class AuthDao {
                     User user = new User( rs );
                     Token token ;
                     try {
-                        token = new Token( rs );
+                        token = new Token( rs );   // перевіряємо чи є в користувача активний токен
                     }
                     catch( SQLException ignored ) {
                         token = null;
                     }
 
-                    if( token == null ) {
-
+                    if( token == null ) {  // якщо немає активного, то створюємо новий токен для користувача
+                        token = this.createToken( user );
                     }
+                    user.setToken( token );
+                    return user;
                 }
             }
+        }
+        catch( SQLException ex ) {
+            logger.warning( ex.getMessage() + " -- " + sql );
+        }
+        return null;
+    }
+
+    public Token createToken( User user ) {
+        Token token = new Token();
+        token.setTokenId( UUID.randomUUID() );
+        token.setUserId( user.getUserId() );
+        token.setIat( new Date( System.currentTimeMillis() ) );
+        token.setExp( new Date( System.currentTimeMillis() + 60000 ) );
+
+        String sql = "INSERT INTO tokens ( token_id, user_id, iat, exp ) " +
+                " VALUES ( ?, ?, ?, ? )";
+        try( PreparedStatement prep = dbService.getConnection().prepareStatement( sql ) ) {
+            prep.setString( 1, token.getTokenId().toString() );
+            prep.setString( 2, token.getUserId().toString() );
+            prep.setTimestamp( 3, new Timestamp( token.getIat().getTime() ) );
+            prep.setTimestamp( 4, new Timestamp( token.getExp().getTime() ) );
+            prep.executeUpdate();
+            return token;
         }
         catch( SQLException ex ) {
             logger.warning( ex.getMessage() + " -- " + sql );
