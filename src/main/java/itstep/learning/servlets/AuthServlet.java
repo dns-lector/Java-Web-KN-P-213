@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import itstep.learning.dal.dao.AuthDao;
+import itstep.learning.dal.dto.User;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -40,7 +41,7 @@ public class AuthServlet extends HttpServlet {
         try {
             // Вилучаємо заголовок Authorization
             String authHeader = req.getHeader( "Authorization" );
-            if ( authHeader == null ) {
+            if( authHeader == null ) {
                 throw new ParseException( "Authorization header not found", 401 );
             }
             // Перевіряємо, що схема Basic
@@ -66,9 +67,15 @@ public class AuthServlet extends HttpServlet {
             if( parts.length != 2 ) {
                 throw new ParseException( "Invalid credentials composition", 400 );
             }
+
+            User user = authDao.authenticate( parts[0], parts[1] );
+            if( user == null ) {
+                throw new ParseException( "Credentials rejected", 401 );
+            }
+
             restResponse.setStatus( "success" );
             restResponse.setCode( 200 );
-            restResponse.setData( decodedCredentials );
+            restResponse.setData( user );
         }
         catch( ParseException ex ) {
             restResponse.setStatus( "error" );

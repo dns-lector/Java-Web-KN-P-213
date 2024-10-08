@@ -2,10 +2,13 @@ package itstep.learning.dal.dao;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import itstep.learning.dal.dto.Token;
+import itstep.learning.dal.dto.User;
 import itstep.learning.services.db.DbService;
 import itstep.learning.services.kdf.KdfService;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.logging.Logger;
@@ -21,6 +24,41 @@ public class AuthDao {
         this.dbService = dbService;
         this.logger = logger;
         this.kdfService = kdfService;
+    }
+
+    public User authenticate( String login, String password ) {
+        String sql = "SELECT * FROM users_access a " +
+                " JOIN users u ON a.user_id = u.user_id " +
+                " JOIN users_roles r ON a.role_id = r.role_id " +
+                " LEFT JOIN tokens t ON u.user_id = t.user_id " +
+                " WHERE a.login = ? ";
+        try( PreparedStatement prep = dbService.getConnection().prepareStatement( sql ) ) {
+            prep.setString( 1, login );
+            ResultSet rs = prep.executeQuery();
+            if( rs.next() ) {  // є такий login
+                String salt = rs.getString( "salt" );
+                String dk   = rs.getString( "dk"   );
+                // повторюємо процедуру DK і перевіряємо чи збігаються результати перетворень
+                if( kdfService.dk( password, salt ).equals( dk ) ) {
+                    User user = new User( rs );
+                    Token token ;
+                    try {
+                        token = new Token( rs );
+                    }
+                    catch( SQLException ignored ) {
+                        token = null;
+                    }
+
+                    if( token == null ) {
+
+                    }
+                }
+            }
+        }
+        catch( SQLException ex ) {
+            logger.warning( ex.getMessage() + " -- " + sql );
+        }
+        return null;
     }
 
     public boolean install() {
