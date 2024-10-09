@@ -6,6 +6,10 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import itstep.learning.dal.dao.AuthDao;
 import itstep.learning.dal.dto.User;
+import itstep.learning.rest.RestMetaData;
+import itstep.learning.rest.RestResponse;
+import itstep.learning.rest.RestServlet;
+import itstep.learning.rest.RestStatus;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -15,14 +19,28 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.Base64;
+import java.util.Date;
 
 @Singleton
-public class AuthServlet extends HttpServlet {
+public class AuthServlet extends RestServlet {
     private final AuthDao authDao;
 
     @Inject
     public AuthServlet(AuthDao authDao) {
         this.authDao = authDao;
+    }
+
+    @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        super.restResponse = new RestResponse()
+                .setMeta( new RestMetaData()
+                        .setUri( "/auth" )
+                        .setMethod( req.getMethod() )
+                        .setName( "KN-P-213 Authentication API" )
+                        .setServerTime( new Date() )
+                        .setAllowedMethods( new String[]{"GET", "POST", "PUT", "DELETE", "OPTIONS"} )
+                );
+        super.service(req, resp);
     }
 
     @Override
@@ -72,60 +90,13 @@ public class AuthServlet extends HttpServlet {
             if( user == null ) {
                 throw new ParseException( "Credentials rejected", 401 );
             }
-
-            restResponse.setStatus( "success" );
-            restResponse.setCode( 200 );
-            restResponse.setData( user );
+            super.sendResponse( user );
         }
         catch( ParseException ex ) {
-            restResponse.setStatus( "error" );
-            restResponse.setCode( ex.getErrorOffset() );
-            restResponse.setData( ex.getMessage() );
-        }
-
-        Gson gson = new GsonBuilder().serializeNulls().create();
-        resp.setContentType( "application/json" );
-        resp.getWriter().print( gson.toJson( restResponse ) );
-    }
-
-    class RestResponse {
-        private int code;
-        private String status;
-        private Object data;
-
-        public RestResponse() {
-        }
-
-        public RestResponse(int code, String status, Object data) {
-            this.code = code;
-            this.status = status;
-            this.data = data;
-        }
-
-        public int getCode() {
-            return code;
-        }
-
-        public void setCode(int code) {
-            this.code = code;
-        }
-
-        public String getStatus() {
-            return status;
-        }
-
-        public void setStatus(String status) {
-            this.status = status;
-        }
-
-        public Object getData() {
-            return data;
-        }
-
-        public void setData(Object data) {
-            this.data = data;
+            super.sendResponse( ex.getErrorOffset(), ex.getMessage() );
         }
     }
+
 }
 /*
 Д.З. Створити сторінку для автоматизованого тестування АРІ
