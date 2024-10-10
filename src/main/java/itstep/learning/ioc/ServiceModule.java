@@ -9,6 +9,8 @@ import itstep.learning.services.hash.HashService;
 import itstep.learning.services.hash.Md5HashService;
 import itstep.learning.services.kdf.KdfService;
 import itstep.learning.services.kdf.PbKdf1Service;
+import itstep.learning.services.storage.LocalStorageService;
+import itstep.learning.services.storage.StorageService;
 
 public class ServiceModule extends AbstractModule {
     @Override
@@ -17,5 +19,6 @@ public class ServiceModule extends AbstractModule {
         bind( KdfService.class       ).to( PbKdf1Service.class         );
         bind( DbService.class        ).to( MySqlDbService.class        );
         bind( FormParseService.class ).to( MixedFormParseService.class );
+        bind( StorageService.class   ).to( LocalStorageService.class   );
     }
 }

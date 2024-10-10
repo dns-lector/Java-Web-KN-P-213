@@ -1,7 +1,5 @@
 package itstep.learning.servlets;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import itstep.learning.dal.dao.AuthDao;
@@ -9,12 +7,11 @@ import itstep.learning.dal.dto.User;
 import itstep.learning.rest.RestMetaData;
 import itstep.learning.rest.RestResponse;
 import itstep.learning.rest.RestServlet;
-import itstep.learning.rest.RestStatus;
 import itstep.learning.services.form.FormParseResult;
 import itstep.learning.services.form.FormParseService;
+import itstep.learning.services.storage.StorageService;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -27,11 +24,13 @@ import java.util.Date;
 public class AuthServlet extends RestServlet {
     private final AuthDao authDao;
     private final FormParseService formParseService;
+    private final StorageService storageService;
 
     @Inject
-    public AuthServlet(AuthDao authDao, FormParseService formParseService) {
+    public AuthServlet(AuthDao authDao, FormParseService formParseService, StorageService storageService) {
         this.authDao = authDao;
         this.formParseService = formParseService;
+        this.storageService = storageService;
     }
 
     @Override
@@ -108,9 +107,18 @@ public class AuthServlet extends RestServlet {
         // АЛЕ! за умови, що форма передається як x-www-form-urlencoded
         // і не працює для multipart/form-data
         FormParseResult formParseResult = formParseService.parse( req );
+        String savedName;
+        try {
+            savedName = storageService.saveFile(
+                    formParseResult.getFiles().get("signup-avatar") );
+        }
+        catch( IOException ex ) {
+            savedName = ex.getMessage();
+        }
         super.sendResponse(
                 "files: " + formParseResult.getFiles().size() +
-                ", fields: " + formParseResult.getFields().size()
+                ", fields: " + formParseResult.getFields().size() +
+                ", name: " + savedName
         );
     }
 }

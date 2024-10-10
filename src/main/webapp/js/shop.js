@@ -120,8 +120,14 @@ function App({contextPath, homePath}) {
 }
 
 function Signup() {
+    const {contextPath} = React.useContext(AppContext);
     const onFormSubmit = React.useCallback( e => {
         e.preventDefault();
+        const formData = new FormData(e.target);
+        fetch(`${contextPath}/auth`, {
+            method: "POST",
+            body: formData
+        }).then(r => r.json()).then(console.log);
     });
     return <div>
         <h1>Реєстрація нового користувача</h1>
