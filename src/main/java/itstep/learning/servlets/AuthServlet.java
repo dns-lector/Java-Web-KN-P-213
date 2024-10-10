@@ -10,6 +10,8 @@ import itstep.learning.rest.RestMetaData;
 import itstep.learning.rest.RestResponse;
 import itstep.learning.rest.RestServlet;
 import itstep.learning.rest.RestStatus;
+import itstep.learning.services.form.FormParseResult;
+import itstep.learning.services.form.FormParseService;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -24,10 +26,12 @@ import java.util.Date;
 @Singleton
 public class AuthServlet extends RestServlet {
     private final AuthDao authDao;
+    private final FormParseService formParseService;
 
     @Inject
-    public AuthServlet(AuthDao authDao) {
+    public AuthServlet(AuthDao authDao, FormParseService formParseService) {
         this.authDao = authDao;
+        this.formParseService = formParseService;
     }
 
     @Override
@@ -97,20 +101,41 @@ public class AuthServlet extends RestServlet {
         }
     }
 
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // Sign Up
+        // req.getParameter("name") - параметри запиту: URL- або form-дані
+        // АЛЕ! за умови, що форма передається як x-www-form-urlencoded
+        // і не працює для multipart/form-data
+        FormParseResult formParseResult = formParseService.parse( req );
+        super.sendResponse(
+                "files: " + formParseResult.getFiles().size() +
+                ", fields: " + formParseResult.getFields().size()
+        );
+    }
 }
 /*
-Д.З. Створити сторінку для автоматизованого тестування АРІ
-У кодах сторінки надсилаються різні запити на /auth
- як правильні, так і такі, що містять помилки
- і виводяться відповіді на них
+HTTP/1.1 200 OK
+Content-Type: application/x-www-form-urlencoded
 
-[Auth]
-Without 'Authorization' header: {code: 401, status: 'error', data: 'Authorization header not found'}
-With non-Basic scheme: {...}
-Correct with login '234' and password '123': {code: 200, status: 'success', data: '234:123'}
+name=User&password=123
 
-** Відповіді, що відповідають очікуванням, позначати зеленим кольором, інші - червоним
 
-Встановити Oracle XE
-https://www.oracle.com/database/technologies/appdev/xe/quickstart.html
+HTTP/1.1 200 OK
+Content-Type: multipart/form-data; delimiter=asdf...w
+--asdf...w
+Content-Disposition: form-field; name=user-name
+
+user
+--asdf...w
+Content-Disposition: form-field; name=user-password
+
+123
+--asdf...w
+Content-Disposition: form-file; name=user-avatar
+
+PNGd45sf4ghsem8jz'dflhgsd4f
+Gzz;jd'
+--asdf...w--
+
  */
