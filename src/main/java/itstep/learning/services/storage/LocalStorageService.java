@@ -16,7 +16,14 @@ public class LocalStorageService implements StorageService {
 
     @Override
     public File getFile( String fileName ) {
-        return null;
+        if( fileName == null ) {
+            return null;
+        }
+        File file = new File( storagePath, fileName );
+        if( ! file.exists() ) {
+            return null;
+        }
+        return file;
     }
 
     @Override
