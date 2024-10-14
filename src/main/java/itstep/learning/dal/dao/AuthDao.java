@@ -142,7 +142,7 @@ public class AuthDao {
                 "`user_name`   VARCHAR(64)  NOT NULL," +
                 "`email`       VARCHAR(128) NOT NULL," +
                 "`phone`       VARCHAR(16)      NULL," +
-                "`avatar_url`  VARCHAR(16)      NULL," +
+                "`avatar_url`  VARCHAR(256)     NULL," +
                 "`birthdate`   DATETIME     NOT NULL," +
                 "`delete_dt`   DATETIME         NULL" +
                 ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";

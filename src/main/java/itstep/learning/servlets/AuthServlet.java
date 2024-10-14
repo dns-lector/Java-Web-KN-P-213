@@ -117,8 +117,13 @@ public class AuthServlet extends RestServlet {
             super.sendResponse( 400, ex.getMessage() );
             return;
         }
-
-        super.sendResponse( 201, "OK" );
+        User user = authDao.signUp( model );
+        if( user == null ) {
+            super.sendResponse( 400, "Signup error" );
+        }
+        else {
+            super.sendResponse( 201, user );
+        }
     }
 
     private SignupFormModel getSignupFormModel(HttpServletRequest req) throws Exception {
