@@ -278,9 +278,9 @@ function AuthModal() {
             </div>
         </div>
     </div>;
-        }
+}
 
-        function Cart() {
+function Cart() {
         const {state, dispatch} = React.useContext(AppContext);
         return <div>
         <h2>Кошик</h2>
@@ -305,6 +305,6 @@ ReactDOM
     .createRoot(domRoot)
     .render(<App contextPath={cp} homePath={hp}/>);
 /*
-Д.З. Впровадити реєстрацію користувачів у
+Д.З. Впровадити таблиці основного контенту у
 власний курсовий проєкт.
  */

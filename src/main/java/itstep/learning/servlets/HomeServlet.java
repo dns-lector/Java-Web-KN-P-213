@@ -2,22 +2,34 @@ package itstep.learning.servlets;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import itstep.learning.dal.dao.AuthDao;
+import itstep.learning.dal.dao.ProductDao;
+import itstep.learning.services.db.DbService;
+import oracle.jdbc.pool.OracleDataSource;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 @Singleton
 public class HomeServlet extends HttpServlet {
     // Впровадження залежностей (інжекція)
     private final AuthDao authDao;   // інжекцію класів (не інтерфейсів) реєструвати не треба
+    private final DbService dbService;
+    private final ProductDao productDao;
 
     @Inject
-    public HomeServlet(AuthDao authDao) {
+    public HomeServlet(AuthDao authDao, @Named("Oracle") DbService dbService, ProductDao productDao) {
         this.authDao = authDao;
+        this.dbService = dbService;
+        this.productDao = productDao;
     }
 
     @Override
@@ -28,10 +40,30 @@ public class HomeServlet extends HttpServlet {
             isSigned = (Boolean) signature;
         }
         if( isSigned ) {
-            String dbMessage =
-                    authDao.install()
-                    ? "Install OK"
-                    : "Install failed";
+            String dbMessage;
+            try {
+                dbMessage =
+                        authDao.install()
+                        // && productDao.install()
+                        ? "Install OK"
+                        : "Install failed";
+            }
+            catch( Exception e ) {
+                dbMessage = e.getMessage();
+            }
+
+
+            try {
+                Statement stmt = dbService.getConnection().createStatement();
+                ResultSet rs = stmt.executeQuery( "SELECT CURRENT_TIMESTAMP FROM dual" );
+                rs.next();
+                dbMessage += " " + rs.getString(1);
+                rs.close();
+                stmt.close();
+            }
+            catch (SQLException e) {
+                dbMessage += " " + e.getMessage();
+            }
 
             req.setAttribute( "hash", dbMessage );
             req.setAttribute( "body", "home.jsp" );   // ~ ViewData["body"] = "home.jsp";
