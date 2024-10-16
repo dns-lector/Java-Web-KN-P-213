@@ -118,7 +118,7 @@ public class AuthDao {
         token.setTokenId( UUID.randomUUID() );
         token.setUserId( user.getUserId() );
         token.setIat( new Date( System.currentTimeMillis() ) );
-        token.setExp( new Date( System.currentTimeMillis() + 60000 ) );
+        token.setExp( new Date( System.currentTimeMillis() + 86400000 ) );
 
         String sql = "INSERT INTO tokens ( token_id, user_id, iat, exp ) " +
                 " VALUES ( ?, ?, ?, ? )";

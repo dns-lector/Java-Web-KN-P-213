@@ -15,3 +15,35 @@
     max-height: 40px;
     max-width: 50px;
 }
+.home-category {
+    border: 1px solid lightgray;
+    cursor: pointer;
+    display: inline-block;
+    height: 25vw;
+    margin: 2.5vw;
+    vertical-align: bottom;
+    width: 20vw;
+}
+.home-category h3 {
+    display: block;
+    font-size: 1.5vw;
+    padding: .1vw 1vw;
+}
+.home-category picture {
+    align-items: center;
+    background-color: antiquewhite;
+    display: flex;
+    height: 19vw;
+    justify-content: center;
+    margin: auto;
+    width: 19vw;
+}
+.home-category img {
+    max-height: 19vw;
+    max-width: 19vw;
+    width: 100%;
+}
+.home-category p {
+    font-size: 1vw;
+    padding: .1vw 1vw;
+}

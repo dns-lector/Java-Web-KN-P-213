@@ -1,4 +1,4 @@
-package itstep.learning.dal.dao;
+package itstep.learning.dal.dao.shop;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -21,8 +21,26 @@ public class ProductDao {
     }
 
     public boolean install() {
-        String sql = "CREATE TABLE products (" +
+
+        String sql = "CREATE TABLE categories (" +
+                "category_id          CHAR(36)        PRIMARY KEY ," +
+                "category_name        NVARCHAR2(64)   NOT NULL," +
+                "category_description NVARCHAR2(1024) NOT NULL," +
+                "category_img_url     VARCHAR(256)    NOT NULL," +
+                "category_delete_dt   DATE                NULL" +
+            ") ";
+
+        try( Statement stmt = dbService.getConnection().createStatement() ) {
+            stmt.executeUpdate( sql ) ;
+        }
+        catch( SQLException ex ) {
+            logger.warning( ex.getMessage() + " -- " + sql );
+            return false;
+        }
+
+        sql = "CREATE TABLE products (" +
                 "product_id          CHAR(36)        PRIMARY KEY ," +
+                "category_id         CHAR(36)        NOT NULL," +
                 "product_name        NVARCHAR2(64)   NOT NULL," +
                 "product_description NVARCHAR2(1024)     NULL," +
                 "product_price       NUMBER(8,2)     NOT NULL," +
