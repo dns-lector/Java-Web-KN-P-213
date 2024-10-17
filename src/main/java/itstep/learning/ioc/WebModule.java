@@ -21,5 +21,6 @@ public class WebModule extends ServletModule {
         serve( "/web-xml"   ).with( WebXmlServlet.class  );
 
         serve( "/shop/category" ).with( CategoryServlet.class );
+        serve( "/shop/product"  ).with( ProductServlet.class  );
     }
 }

@@ -47,3 +47,53 @@
     font-size: 1vw;
     padding: .1vw 1vw;
 }
+
+.product-card {
+    cursor: pointer;
+    display: inline-block;
+    height: 20vw;
+    margin: 2.0vw;
+    position: relative;
+    vertical-align: bottom;
+    width: 14vw;
+}
+.product-card picture {
+    align-items: center;
+    background-color: #eee;
+    display: flex;
+    height: 14vw;
+    justify-content: center;
+    margin: auto;
+    width: 14vw;
+}
+.product-card img {
+    max-height: 14vw;
+    max-width: 14vw;
+    width: 100%;
+}
+.product-card h3 {
+    font-size: 1.25vw;
+    margin: .5vw 0 0 0;
+}
+.product-card p {
+    font-size: 1vw;
+    margin: 0;
+    padding: .1vw 0;
+}
+.product-card h4 {
+    font-size: 1.5vw;
+    margin: 0;
+}
+.cart-fab {
+    align-items: center;
+    background-color: tomato;
+    border-radius: 50%;
+    bottom: 4.5vw;
+    color: snow;
+    display: flex;
+    height: 3vw;
+    justify-content: center;
+    position: absolute;
+    right: .75vw;
+    width: 3vw;
+}

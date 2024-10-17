@@ -11,6 +11,7 @@ public class Category {
     private String name;
     private String description;
     private String imageUrl;
+    private String slug;
     private Date   deleteDt;
 
     public Category() {}
@@ -20,10 +21,19 @@ public class Category {
         this.setName( rs.getString( "category_name" ) );
         this.setDescription( rs.getString( "category_description" ) );
         this.setImageUrl( rs.getString( "category_img_url" ) );
+        this.setSlug( rs.getString( "category_slug" ) );
         Timestamp timestamp = rs.getTimestamp( "category_delete_dt" );
         if( timestamp != null ) {
             this.setDeleteDt( new Date( timestamp.getTime() ) );
         }
+    }
+
+    public String getSlug() {
+        return slug;
+    }
+
+    public void setSlug(String slug) {
+        this.slug = slug;
     }
 
     public UUID getId() {

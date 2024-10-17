@@ -41,9 +41,8 @@ function App({contextPath, homePath}) {
     });
     const checkHash = React.useCallback( () => {
         let hash = window.location.hash;
-        if( hash.length > 1 ) {
-            dispatch( { type: "navigate", payload: hash.substring(1) } );
-        }
+        let path = ( hash.length > 1 ) ? hash.substring(1) : "home";
+        dispatch( { type: "navigate", payload: path } );
     } ) ;
     React.useEffect( () => {
         let authUser = window.localStorage.getItem( "auth-user" );
@@ -137,6 +136,7 @@ function App({contextPath, homePath}) {
             { state.page === 'home'   && <Home/>   }
             { state.page === 'signup' && <Signup/> }
             { state.page.startsWith('category/') && <Category id={state.page.substring(9)}/> }
+            { state.page.startsWith('product/') && <Product id={state.page.substring(8)}/> }
         </main>
         <div className="spacer"></div>
 
@@ -156,6 +156,7 @@ function Admin() {
         }
     }, [] );
     const categoryFormRef = React.useRef();
+    const productFormRef = React.useRef();
     const onCategorySubmit = React.useCallback(e => {
         e.preventDefault();
         const formData = new FormData(e.target);
@@ -172,6 +173,22 @@ function Admin() {
             }
         });
     });
+    const onProductSubmit = React.useCallback(e => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        fetch(`${contextPath}/shop/product`, {
+            method: "POST",
+            body: formData
+        }).then(r => r.json()).then(j => {
+            if (j.status.isSuccessful) {
+                alert("Товар успішно створений");
+                productFormRef.current.reset();
+            } else {
+                alert(j.data);
+            }
+        });
+    });
+
     return <div>
         <h1>Панель адміністрування</h1>
         <hr/>
@@ -216,10 +233,81 @@ function Admin() {
             </div>
             <div className="row">
                 <div className="col col-6">
-                    <button type="submit" className="btn btn-outline-success">Створити</button>
+
                 </div>
                 <div className="col col-6">
-
+                    <button type="submit" className="btn btn-outline-success">Створити</button>
+                </div>
+            </div>
+        </form>
+        <hr/>
+        <h2>Створення товарів</h2>
+        <form encType="multipart/form-data" method="POST"
+              onSubmit={onProductSubmit} ref={productFormRef}>
+            <div className="row">
+                <div className="col col-6">
+                    <div className="input-group mb-3">
+                        <span className="input-group-text" id="product-name-addon"><i className="bi bi-info-square"></i></span>
+                        <input type="text" className="form-control"
+                               name="product-name" placeholder="Назва"
+                               aria-label="Назва" aria-describedby="product-name-addon"/>
+                    </div>
+                </div>
+                <div className="col col-6">
+                    <div className="input-group mb-3">
+                        <span className="input-group-text" id="product-description-addon"><i
+                            className="bi bi-card-text"></i></span>
+                        <input type="text" className="form-control"
+                               name="product-description" placeholder="Опис"
+                               aria-label="Опис" aria-describedby="product-description-addon"/>
+                    </div>
+                </div>
+            </div>
+            <div className="row">
+                <div className="col col-6">
+                    <div className="input-group mb-3">
+                        <label className="input-group-text" htmlFor="product-image"><i
+                            className="bi bi-card-image"></i></label>
+                        <input type="file" className="form-control" name="product-image" id="product-image"/>
+                    </div>
+                </div>
+                <div className="col col-6">
+                    <div className="input-group mb-3">
+                        <span className="input-group-text" id="product-slug-addon"><i className="bi bi-link"></i></span>
+                        <input type="text" className="form-control"
+                               name="product-slug" placeholder="Slug"
+                               aria-label="Slug" aria-describedby="product-slug-addon"/>
+                    </div>
+                </div>
+            </div>
+            <div className="row">
+                <div className="col col-6">
+                    <div className="input-group mb-3">
+                        <span className="input-group-text" id="product-price-addon"><i
+                            className="bi bi-cash"></i></span>
+                        <input type="number" step="0.01" className="form-control"
+                               name="product-price" placeholder="Ціна"
+                               aria-label="Ціна" aria-describedby="product-price-addon"/>
+                    </div>
+                </div>
+                <div className="col col-6">
+                    <select name="category-id" className="form-select" aria-label="Вибір категорії">
+                        {state.categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                    </select>
+                </div>
+            </div>
+            <div className="row">
+                <div className="col col-6">
+                    <div className="input-group mb-3">
+                        <span className="input-group-text" id="product-quantity-addon"><i
+                            className="bi bi-1-circle"></i></span>
+                        <input type="number" step="1" className="form-control" defaultValue="1"
+                               name="product-quantity" placeholder="Кількість"
+                               aria-label="Кількість" aria-describedby="product-quantity-addon"/>
+                    </div>
+                </div>
+                <div className="col col-6">
+                    <button type="submit" className="btn btn-outline-success">Створити</button>
                 </div>
             </div>
         </form>
@@ -254,33 +342,33 @@ function Signup() {
                 <div className="col col-6">
                     <div className="input-group mb-3">
                         <span className="input-group-text" id="name-addon"><i className="bi bi-person-badge"></i></span>
-                    <input type="text" className="form-control"
-                           name="signup-name" placeholder="Ім'я"
-                           aria-label="Ім'я" aria-describedby="name-addon"/>
+                        <input type="text" className="form-control"
+                               name="signup-name" placeholder="Ім'я"
+                               aria-label="Ім'я" aria-describedby="name-addon"/>
+                    </div>
+                </div>
+                <div className="col col-6">
+                    <div className="input-group mb-3">
+                        <span className="input-group-text" id="birthdate-addon"><i className="bi bi-cake"></i></span>
+                        <input type="date" className="form-control"
+                               name="signup-birthdate" placeholder="Дата народження"
+                               aria-label="Дата народження" aria-describedby="birthdate-addon"/>
+                    </div>
                 </div>
             </div>
-            <div className="col col-6">
-                <div className="input-group mb-3">
-                    <span className="input-group-text" id="birthdate-addon"><i className="bi bi-cake"></i></span>
-                    <input type="date" className="form-control"
-                           name="signup-birthdate" placeholder="Дата народження"
-                           aria-label="Дата народження" aria-describedby="birthdate-addon"/>
+            <div className="row">
+                <div className="col col-6">
+                    <div className="input-group mb-3">
+                        <span className="input-group-text" id="phone-addon"><i className="bi bi-phone"></i></span>
+                        <input type="text" className="form-control"
+                               name="signup-phone" placeholder="Телефон"
+                               aria-label="Телефон" aria-describedby="phone-addon"/>
+                    </div>
                 </div>
-            </div>
-        </div>
-        <div className="row">
-            <div className="col col-6">
-                <div className="input-group mb-3">
-                    <span className="input-group-text" id="phone-addon"><i className="bi bi-phone"></i></span>
-                    <input type="text" className="form-control"
-                           name="signup-phone" placeholder="Телефон"
-                           aria-label="Телефон" aria-describedby="phone-addon"/>
-                </div>
-            </div>
-            <div className="col col-6">
-                <div className="input-group mb-3">
-                    <span className="input-group-text" id="email-addon"><i className="bi bi-envelope-at"></i></span>
-                    <input type="text" className="form-control"
+                <div className="col col-6">
+                    <div className="input-group mb-3">
+                        <span className="input-group-text" id="email-addon"><i className="bi bi-envelope-at"></i></span>
+                        <input type="text" className="form-control"
                            name="signup-email" placeholder="Ел. пошта"
                            aria-label="Ел. пошта" aria-describedby="email-addon"/>
                 </div>
@@ -399,7 +487,7 @@ function Home() {
         <h2>Домашня</h2>
         {state.categories.map(c => <div
             key={c.id} className="home-category"
-            onClick={() => dispatch({type: 'navigate', payload: 'category/' + c.id})}>
+            onClick={() => dispatch({type: 'navigate', payload: 'category/' + (c.slug || c.id) })}>
             <h3>{c.name}</h3>
             <picture>
                 <img src={"storage/" + c.imageUrl} alt="category" />
@@ -410,8 +498,41 @@ function Home() {
 }
 
 function Category({id}) {
+    const { contextPath, dispatch } = React.useContext(AppContext);
+    const [products, setProducts] = React.useState([]);
+    React.useEffect( () => {
+        fetch(`${contextPath}/shop/product?category=${id}`)
+            .then(r => r.json())
+            .then(j => {
+                if(j.status.isSuccessful) {
+                    setProducts(j.data);
+                }
+                else {
+                    console.error(j.data);
+                }
+            });
+    }, [id]);
+    const cartClick = React.useCallback( e => {
+        e.stopPropagation();
+    });
     return <div>
-        Category page: {id}
+        <h2>Category page: {id}</h2>
+        {products.map(p => <div key={p.id} className="product-card"
+            onClick={() => dispatch({type: 'navigate', payload: 'product/' + (p.slug || p.id) })}>
+            <picture>
+                <img src={"storage/" + p.imageUrl} alt="product" />
+            </picture>
+            <h3>{p.name}</h3>
+            <p>{p.description}</p>
+            <h4>₴ {p.price.toFixed(2)}</h4>
+            <span className="cart-fab" onClick={cartClick}><i className="bi bi-bag-check"></i></span>
+        </div>)}
+    </div>;
+}
+
+function Product({id}) {
+    return <div>
+        <h2>Product page: {id}</h2>
     </div>;
 }
 
@@ -424,6 +545,6 @@ ReactDOM
     .createRoot(domRoot)
     .render(<App contextPath={cp} homePath={hp}/>);
 /*
-Д.З. Впровадити API основного контенту у
+Д.З. Впровадити слагіфікацію основного контенту у
 власний курсовий проєкт.
  */
