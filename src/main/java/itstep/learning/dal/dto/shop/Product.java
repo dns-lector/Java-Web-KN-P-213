@@ -20,6 +20,7 @@ public class Product {
 
     private Category category;
     private List<String> imageUrls;
+    private List<Product> similarProducts;
 
     public Product() {
     }
@@ -44,6 +45,14 @@ public class Product {
     public UUID getId() {
 
         return id;
+    }
+
+    public List<Product> getSimilarProducts() {
+        return similarProducts;
+    }
+
+    public void setSimilarProducts(List<Product> similarProducts) {
+        this.similarProducts = similarProducts;
     }
 
     public void setId(UUID id) {

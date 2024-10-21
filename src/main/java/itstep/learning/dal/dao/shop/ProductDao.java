@@ -71,6 +71,50 @@ public class ProductDao {
         }
     }
 
+    public Product getByIdOrSlug( String idOrSlug ) {
+        return getByIdOrSlug( idOrSlug, false );
+    }
+
+    public Product getByIdOrSlug( String idOrSlug, boolean withSimilar ) {
+        Product product = null;
+        String sql = "SELECT * FROM products WHERE ";
+        try {
+            UUID.fromString( idOrSlug );
+            sql += " product_id = ? ";
+        }
+        catch( Exception ignored ) {
+            sql += " product_slug = ? ";
+        }
+        try( PreparedStatement prep = dbService.getConnection().prepareStatement( sql ) ) {
+            prep.setString( 1, idOrSlug );
+            ResultSet rs = prep.executeQuery();
+            if( rs.next() ) {
+                product =  new Product( rs );
+            }
+        }
+        catch( SQLException ex ) {
+            logger.warning( ex.getMessage() + " -- " + sql );
+        }
+
+        if( product != null && withSimilar ) {
+            sql = "SELECT * FROM products WHERE category_id = ? AND product_id <> ? FETCH NEXT 3 ROWS ONLY" ;
+            try( PreparedStatement prep = dbService.getConnection().prepareStatement(sql) ) {
+                prep.setString( 1, product.getCategoryId().toString() );
+                prep.setString( 2, product.getId().toString() );
+                ResultSet rs = prep.executeQuery();
+                List<Product> similar = new ArrayList<>();
+                while( rs.next() ) {
+                    similar.add( new Product( rs ) );
+                }
+                product.setSimilarProducts( similar );
+            }
+            catch( SQLException ex ) {
+                logger.warning( ex.getMessage() + " -- " + sql );
+            }
+        }
+        return product;
+    }
+
     public List<Product> read( String categoryIdOrSlug ) {
         return read( categoryIdOrSlug, false );
     }

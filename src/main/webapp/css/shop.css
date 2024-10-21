@@ -97,3 +97,9 @@
     right: .75vw;
     width: 3vw;
 }
+.product-page-left img {
+    width: 90%;
+}
+.scale-75 {
+    transform: scale(.75);
+}

@@ -49,13 +49,25 @@ public class ProductServlet extends RestServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String category = req.getParameter( "category" );
-        if( category == null || category.isEmpty() ) {
-            super.sendResponse( 400, "Missing required field 'category' " );
+        String id = req.getParameter( "id" );
+        if( id != null ) {
+            this.getById( id );
             return;
         }
+        String category = req.getParameter( "category" );
+        if( category != null ) {
+            this.getByCategory( category );
+            return;
+        }
+        super.sendResponse( 400, "Missing required field: 'category' or 'id' " );
+    }
+    private void getById( String id ) throws IOException {
+        super.sendResponse( 200, productDao.getByIdOrSlug( id, true ) );
+    }
+    private void getByCategory( String category ) throws IOException {
         super.sendResponse( 200, productDao.read( category ) );
     }
+
 
     @Override   // CREATE
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
