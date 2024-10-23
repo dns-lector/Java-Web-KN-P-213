@@ -26,6 +26,28 @@ public class AuthDao {
         this.kdfService = kdfService;
     }
 
+    public User getUserByToken( String token ) {
+        UUID tokenId;
+        try{ tokenId = UUID.fromString(token); }
+        catch( Exception ignored ) { return null; }
+        String sql = "SELECT * FROM users_access a " +
+                " JOIN users u ON a.user_id = u.user_id " +
+                " JOIN users_roles r ON a.role_id = r.role_id " +
+                " JOIN tokens t ON u.user_id = t.user_id AND t.exp > CURRENT_TIMESTAMP" +
+                " WHERE t.token_id = ?";
+        try( PreparedStatement prep = dbService.getConnection().prepareStatement(sql) ) {
+            prep.setString( 1, tokenId.toString() );
+            ResultSet rs = prep.executeQuery();
+            if( rs.next() ) {
+                return new User( rs );
+            }
+        }
+        catch( SQLException ex ) {
+            logger.warning( ex.getMessage() + " -- " + sql );
+        }
+        return null;
+    }
+
     public User signUp( SignupFormModel model ) {
         if( model == null ) {
             return null;

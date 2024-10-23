@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import itstep.learning.dal.dao.AuthDao;
+import itstep.learning.dal.dao.shop.CartDao;
 import itstep.learning.dal.dao.shop.ProductDao;
 import itstep.learning.services.db.DbService;
 
@@ -21,13 +22,13 @@ public class HomeServlet extends HttpServlet {
     // Впровадження залежностей (інжекція)
     private final AuthDao authDao;   // інжекцію класів (не інтерфейсів) реєструвати не треба
     private final DbService dbService;
-    private final ProductDao productDao;
+    private final CartDao cartDao;
 
     @Inject
-    public HomeServlet(AuthDao authDao, @Named("Oracle") DbService dbService, ProductDao productDao) {
+    public HomeServlet(AuthDao authDao, @Named("Oracle") DbService dbService, CartDao cartDao) {
         this.authDao = authDao;
         this.dbService = dbService;
-        this.productDao = productDao;
+        this.cartDao = cartDao;
     }
 
     @Override
@@ -42,7 +43,7 @@ public class HomeServlet extends HttpServlet {
             try {
                 dbMessage =
                         authDao.install()
-                        // && productDao.install()
+                        // && cartDao.install()
                         ? "Install OK"
                         : "Install failed";
             }

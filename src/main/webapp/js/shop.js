@@ -48,6 +48,17 @@ function App({contextPath, homePath}) {
         if( url.startsWith('/') ) {
             url = contextPath + url;
         }
+        if( state.authUser && state.authUser.token && state.authUser.token.tokenId ) {
+            if( typeof params === 'undefined' || params == null ) {
+                params = {};
+            }
+            if( typeof params.headers === 'undefined' ) {
+                params.headers = {};
+            }
+            if( typeof params.headers.Authorization === 'undefined' ) {
+                params.headers.Authorization = "Bearer " + state.authUser.token.tokenId;
+            }
+        }
         fetch( url, params )
             .then(r => r.json())
             .then(j => {
@@ -509,7 +520,7 @@ function Home() {
 }
 
 function Category({id}) {
-    const { contextPath, dispatch } = React.useContext(AppContext);
+    const { contextPath, dispatch, request } = React.useContext(AppContext);
     const [products, setProducts] = React.useState([]);
     React.useEffect( () => {
         fetch(`${contextPath}/shop/product?category=${id}`)
@@ -523,8 +534,11 @@ function Category({id}) {
                 }
             });
     }, [id]);
-    const cartClick = React.useCallback( e => {
+    const cartClick = React.useCallback( (e, product) => {
         e.stopPropagation();
+        request('/shop/cart?product-id=' + product.id, {
+            method: 'POST'
+        }).then(console.log).catch(console.error);
     });
     return <div>
         <h2>Category page: {id}</h2>
@@ -536,7 +550,7 @@ function Category({id}) {
             <h3>{p.name}</h3>
             <p>{p.description}</p>
             <h4>₴ {p.price.toFixed(2)}</h4>
-            <span className="cart-fab" onClick={cartClick}><i className="bi bi-bag-check"></i></span>
+            <span className="cart-fab" onClick={(e) => cartClick(e, p)}><i className="bi bi-bag-check"></i></span>
         </div>)}
     </div>;
 }
@@ -607,6 +621,6 @@ ReactDOM
     .createRoot(domRoot)
     .render(<App contextPath={cp} homePath={hp}/>);
 /*
-Д.З. Впровадити similarity контенту у
-власний курсовий проєкт. (Вас також може зацікавити / з цим також купують/переглядають ...
+Д.З. Впровадити замовлення контенту у
+власний курсовий проєкт. (кошик/білети/послуги)
  */

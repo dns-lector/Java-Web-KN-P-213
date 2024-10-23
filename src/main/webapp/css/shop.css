@@ -101,5 +101,6 @@
     width: 90%;
 }
 .scale-75 {
+    transform-box: content-box;
     transform: scale(.75);
 }
