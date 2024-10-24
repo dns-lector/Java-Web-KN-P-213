@@ -16,6 +16,7 @@ public class Cart {
     private int  status;
 
     private User user;
+    private CartItem[] cartItems;
 
     public Cart() {
     }
@@ -33,6 +34,14 @@ public class Cart {
 
         try { this.setUser( new User( rs ) ); }
         catch( Exception ignored ) {}
+    }
+
+    public CartItem[] getCartItems() {
+        return cartItems;
+    }
+
+    public void setCartItems(CartItem[] cartItems) {
+        this.cartItems = cartItems;
     }
 
     public UUID getId() {

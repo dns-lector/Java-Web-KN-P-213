@@ -104,3 +104,16 @@
     transform-box: content-box;
     transform: scale(.75);
 }
+.cart-row picture {
+    cursor: pointer;
+    width: 100%;
+}
+.cart-row img {
+    width: 100%;
+}
+.cart-widget-quantity {
+    background-color: aquamarine;
+    border-radius: 50%;
+    display: inline-block;
+    padding: 0  .5em;
+}

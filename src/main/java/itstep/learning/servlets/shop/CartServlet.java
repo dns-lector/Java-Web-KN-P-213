@@ -5,7 +5,7 @@ import com.google.inject.Singleton;
 import itstep.learning.dal.dao.shop.CartDao;
 import itstep.learning.dal.dao.shop.ProductDao;
 import itstep.learning.dal.dto.User;
-import itstep.learning.dal.dto.shop.CartItem;
+import itstep.learning.dal.dto.shop.Cart;
 import itstep.learning.dal.dto.shop.Product;
 import itstep.learning.rest.RestMetaData;
 import itstep.learning.rest.RestResponse;
@@ -45,12 +45,11 @@ public class CartServlet extends RestServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         User user = (User) req.getAttribute( "auth-token-user" );
         if( user != null ) {
-
+            super.sendResponse( 200, cartDao.getCartByUser( user, true ) );
         }
         else {
-            super.sendResponse( 401, new CartItem[0] );
+            super.sendResponse( 401, null );
         }
-
     }
 
     @Override
@@ -75,16 +74,95 @@ public class CartServlet extends RestServlet {
             return;
         }
         User user = (User) req.getAttribute( "auth-token-user" );
-        if( user != null ) {
-            if( cartDao.add( user, product ) ) {
+        if( user == null ) {
+            super.sendResponse( 401 );
+            return;
+        }
+        try {
+            if( cartDao.add(user, product) ) {
                 super.sendResponse( 201, "Added" );
             }
             else {
                 super.sendResponse( 500, "Error adding product" );
             }
         }
-        else {
-            super.sendResponse( 401 );
+        catch( Exception ex ) {
+            super.sendResponse( 400, ex.getMessage() );
         }
     }
+
+    @Override
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        User user = (User) req.getAttribute( "auth-token-user" );
+        if( user == null ) {
+            super.sendResponse( 401, null );
+            return;
+        }
+        String cartId = req.getParameter( "cart-id" );
+        if( cartId == null || cartId.isEmpty() ) {
+            super.sendResponse( 400, "Missing required parameter 'cart-id'" );
+            return;
+        }
+        String productId = req.getParameter( "product-id" );
+        if( productId == null || productId.isEmpty() ) {
+            super.sendResponse( 400, "Missing required parameter 'product-id'" );
+        }
+        int increment;
+        String delta = req.getParameter( "delta" );
+        if( delta == null || delta.isEmpty() ) {
+            increment = 1;
+        }
+        else {
+            try { increment = Integer.parseInt( delta ); }
+            catch( NumberFormatException ignored ) {
+                super.sendResponse( 400, "Invalid format for parameter 'delta'" );
+                return;
+            }
+        }
+        try {
+            if( cartDao.update(cartId, productId, increment) ) {
+                super.sendResponse( 202, "Updated" );
+            }
+            else {
+                super.sendResponse( 500, "Error updating product" );
+            }
+        }
+        catch( Exception ex ) {
+            super.sendResponse( 400, ex.getMessage() );
+        }
+    }
+
+    @Override
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        User user = (User) req.getAttribute( "auth-token-user" );
+        if( user == null ) {
+            super.sendResponse( 401, null );
+            return;
+        }
+        Cart cart = cartDao.getCartByUser(user);
+        if( cart == null ) {
+            super.sendResponse( 404, "User's cart not found" );
+            return;
+        }
+        String cartId = req.getParameter( "cart-id" );
+        if( cartId == null || cartId.isEmpty() ) {
+            super.sendResponse( 400, "Missing required parameter 'cart-id'" );
+            return;
+        }
+        if( ! cart.getId().toString().equals( cartId ) ) {
+            super.sendResponse( 403, "Access forbidden to 'cart-id'" );
+            return;
+        }
+        // Наявність параметра "product-id" свідчить про видалення cart-item,
+        // відсутність - про закриття всього кошику
+        String productId = req.getParameter( "product-id" );
+        if( productId == null || productId.isEmpty() ) {
+            cartDao.deleteCart( cartId );
+        }
+        else {
+            cartDao.deleteCartItem( cartId, productId );
+        }
+        super.sendResponse( 202, "Data to be processed" );
+    }
+
 }
